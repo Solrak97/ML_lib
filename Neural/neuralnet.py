@@ -4,6 +4,15 @@ from layers import DenseLayer
 
 
 
+def MSE(y_true, y_predict) -> float:
+    n = y_true.shape[0]
+    if n != y_predict.shape[0]:
+        raise Exception("true and predict sizes don't match")
+    
+    else:
+        return np.sum(((y_true - y_predict) ** 2)/n)
+
+
 class DenseNN:
     wegths = []
     layers = []
@@ -70,6 +79,9 @@ class DenseNN:
         pass
 
     def backpropagation(self, x, y):
+        p = self.predict(x)
+        e = MSE(y, p)
+        print(e)
         pass
 
 

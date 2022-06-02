@@ -3,7 +3,7 @@ from neuralnet import DenseNN
 
 # Laboratorio 4: Redes Neuronales
 # Integrantes:
-# - Luis Carlos Quesada Rodriguez / B6
+# - Luis Carlos Quesada Rodriguez / B65580
 # - Gianfranco Bagnarello Hernandez / B70866
 
 def train(net, epochs, x, y):

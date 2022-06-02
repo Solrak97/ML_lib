@@ -14,7 +14,7 @@ def MSE(y_true, y_predict) -> float:
 
 
 class DenseNN:
-    wegths = []
+    weights = []
     layers = []
     layer_dims = None
     learning_rate = None
@@ -23,6 +23,8 @@ class DenseNN:
     epochs = None
     seed = None
     trained = False
+    weight_gradients = []
+
 
     def __init__(self, layers: list[int], activation: list[str], seed=0):
         self.layer_dims = layers
@@ -52,13 +54,13 @@ class DenseNN:
             m = layers[i]
 
             w_matrix = self.xaviers_init((n, m))
-            self.wegths.append(w_matrix)
+            self.weights.append(w_matrix)
 
         n = layers[-2] + 1
-        m = layers[-1]
+        m = layers[-1] 
 
         w_matrix = self.xaviers_init((n, m))
-        self.wegths.append(w_matrix)
+        self.weights.append(w_matrix)
         pass
 
 
@@ -76,30 +78,54 @@ class DenseNN:
         pass
 
     def step(self):
+        # Método step(self) que ejecuta la actualización de los pesos de la matriz, 
+
+        # aplica la actualización de la tasa de aprendizaje en caso de decaimiento
+
+        # aplica el momentum.
+        
+        # Además avanza el contador de época en 1.
+        self.epochs += 1
         pass
+
+    # Tridimensional space for fun purposes
+    def delta_k(self, i, k, delta_i):
+        delta = 0
+        print(self.weights[i].shape)
+        print(self.layers[i].neuronas)
+
+        for j in range(self.layers[i + 1].neuronas):
+            print(i,j,k)
+            delta += self.weights[i][k][j] * delta_i[j] * self.layers[i].gradiente(self.layers[i].salida[j]) 
+        return delta
+
 
     def backpropagation(self, x, y):
         p = self.predict(x)
-        e = MSE(y, p)
-        print(e)
-        pass
+
+        delta = 2 * (p - y) * self.layers[-1].gradiente(p)
+        
+        for i in range(len(self.layers) - 2, 0, -1):
+            deltas = []
+            for k in range(self.layers[i].neuronas):
+                deltak = self.delta_k(i, k, delta)
+                deltas.append(deltak)
+            delta = np.array(deltas)
+
+
 
 
     def predict(self, x):
         if not self.trained:
             raise Exception('Error: No se pueden realizar predicciones sobre un modelo no entrenado')
-        # Inicializa el valor de entrada
+        
         neto = x
-
-        # Recorre n - 1 capas, la primera tiene tag entrada
-        # Esto causa que la activación retorne el valor neto
-        for i in range(len(self.wegths)):
-            neto = np.c_[neto, np.ones(x.shape[0])]
+        for i in range(len(self.weights)):
+            neto = np.r_[neto, np.ones(1)]
             self.layers[i].set_netos(neto)
             salida = self.layers[i].activate()
-            neto = np.matmul(salida, self.wegths[i])
+            neto = np.matmul(salida, self.weights[i])
 
-        # Se obtiene el reulstado aplicando la ultima capa
         self.layers[-1].set_netos(neto)
         salida = self.layers[-1].activate()
 

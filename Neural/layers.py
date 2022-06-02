@@ -1,3 +1,4 @@
+from matplotlib.pyplot import pink
 from activation import sigmoid, d_sigmoid, relu, d_relu, tanh, d_tanh, lrelu, d_lrelu
 import numpy as np
 

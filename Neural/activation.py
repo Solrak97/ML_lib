@@ -1,14 +1,11 @@
 from math import e
 
-
-
-
 def sigmoid(x):
     return 1/(1 + e**(-x))
 
 
 def d_sigmoid(y):
-    return sigmoid(y) * (1- sigmoid(y))
+    return y * (1 - y)
 
 
 def tanh(x):
@@ -16,7 +13,7 @@ def tanh(x):
 
 
 def d_tanh(y):
-    return 1 - tanh(y)^2
+    return 1 - y**2
 
 
 def relu(x):
@@ -28,7 +25,7 @@ def d_relu(y):
 
 
 def lrelu(x):
-     return (x if x>0 else 0.01 * x)
+     return (x if x > 0 else 0.01 * x)
 
 
 def d_lrelu(y):

@@ -18,12 +18,13 @@ class DenseNN:
     layers = []
     layer_dims = None
     learning_rate = None
-    moemntum = None
+    momentum = None
     decay = None
     epochs = None
     seed = None
     trained = False
     weight_gradients = []
+    last_gradient = None
 
 
     def __init__(self, layers: list[int], activation: list[str], seed=0):
@@ -74,28 +75,40 @@ class DenseNN:
     def train(self, lr=0.05, momentum=0, decay=0):
         self.trained = True
         self.epochs = 0
+        self.momentum = momentum
+        self.learning_rate = lr
+        self.decay = decay
         self.crea_pesos(self.layer_dims, self.seed)
         pass
 
     def step(self):
-        # Método step(self) que ejecuta la actualización de los pesos de la matriz, 
-
+        
         # aplica la actualización de la tasa de aprendizaje en caso de decaimiento
-
+        self.learning_rate = self.learning_rate / (1 - self.decay)
+        
         # aplica el momentum.
+        if self.last_gradient is None:
+            for i in range(len(self.weight_gradients)):
+                self.weights[i] = self.weights[i] - (self.learning_rate * self.weight_gradients[i])
+
+        else:
+            for i in range(len(self.weight_gradients)):
+                
+                self.weights[i] = self.weights[i] - self.learning_rate * (self.weight_gradients[i] + self.momentum * self.last_gradient[i])
+
+
+        self.last_gradient = self.last_gradient = self.weight_gradients
+
         
         # Además avanza el contador de época en 1.
+        self.weight_gradients = []
         self.epochs += 1
         pass
 
     # Tridimensional space for fun purposes
     def delta_k(self, i, k, delta_i):
         delta = 0
-        print(self.weights[i].shape)
-        print(self.layers[i].neuronas)
-
         for j in range(self.layers[i + 1].neuronas):
-            print(i,j,k)
             delta += self.weights[i][k][j] * delta_i[j] * self.layers[i].gradiente(self.layers[i].salida[j]) 
         return delta
 
@@ -110,7 +123,33 @@ class DenseNN:
             for k in range(self.layers[i].neuronas):
                 deltak = self.delta_k(i, k, delta)
                 deltas.append(deltak)
+
+            dW = np.zeros(self.weights[i].shape)
+            for n in range(len(self.layers[i].salida)):
+                for m in range(len(delta)):
+                    dW[n][m] = self.layers[i].salida[n] * delta[m]
+
+            self.weight_gradients.append(dW)
             delta = np.array(deltas)
+
+        
+        deltas = []
+        for k in range(self.layers[0].neuronas):
+            for j in range(self.layers[1].neuronas):
+                deltak += self.weights[0][k][j] * delta[j] * self.layers[0].netos
+                deltas.append(deltak)
+
+        dW = np.zeros(self.weights[0].shape)
+        for n in range(len(self.layers[i].salida)):
+            for m in range(len(delta)):
+                dW[n][m] = self.layers[i].salida[n] * delta[m]
+
+        self.weight_gradients.append(dW)
+        
+
+        self.weight_gradients.reverse()
+
+        return(MSE(p, y))
 
 
 

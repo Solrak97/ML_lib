@@ -1,6 +1,4 @@
 import pandas as pd
-import numpy as np
-from layers import DenseLayer
 from neuralnet import DenseNN
 
 # Laboratorio 4: Redes Neuronales

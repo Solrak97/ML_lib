@@ -21,13 +21,11 @@ def encode(array):
 
 
 def transform(x_train, x_test, y_train, y_test):
-    x_train = x_train.reshape((50000, 3, 32, 32))
-    x_train = [torch.from_numpy(x).type(torch.float32) for x in x_train[:100]]
-    x_test = x_test.reshape((10000, 3, 32, 32))
-    x_test = [torch.from_numpy(x).type(torch.float32) for x in x_test[:100]]
-
-    y_train = torch.from_numpy(encode(np.array(y_train[:100])))
-    y_test = torch.from_numpy(encode(np.array(y_test[:100])))
+    x_train = torch.from_numpy(x_train.reshape((50000, 3, 32, 32))[:25000]).type(torch.float32)
+    x_test = torch.from_numpy(x_test.reshape((10000, 3, 32, 32))).type(torch.float32)
+    
+    y_train = torch.from_numpy(encode(np.array(y_train[:25000])))
+    y_test = torch.from_numpy(encode(np.array(y_test)))
 
     return x_train, x_test, y_train, y_test
 

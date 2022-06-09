@@ -10,12 +10,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 names, x_train, y_train, x_test, y_test = load_data()
 x_train, x_test, y_train, y_test = transform(x_train, x_test, y_train, y_test)
 
-
 # Hiperparametros
-INIT_LR = 1e-7
+INIT_LR = 1e-3
 EPOCHS = 250
-VAL_SIZE = 10000
-TRAIN_SIZE = 50000
+VAL_SIZE = 1000
+TRAIN_SIZE = 1000
 
 # Modelo
 model = CnnModel()
@@ -34,39 +33,31 @@ val_acc_hist = []
 # Entrenamiento del modelo
 model.train()
 for epoch in range(0, EPOCHS):
-    
     # Training
     opt.zero_grad()
 
     pred = model(x_train)
-    _, target = y_train.max(dim=0)
-    
-    loss = lossFn(pred, target)
+
+    loss = lossFn(pred, y_train)
     loss.backward()
     opt.step()
+
     
-    train_correct = (pred.argmax() ==
-                      target).type(torch.float).sum().item()
-
-
-
+    train_correct = (torch.argmax(pred, dim=1) == torch.argmax(
+        y_train, 1)).type(torch.float).sum().item()
 
     # Validation
-    pred = model(x_test)
-    _, target = y_test.max(dim=0)
+    with torch.no_grad():
+        pred = model(x_test)
 
-    val_correct = (pred.argmax() ==
-                        target).type(torch.float).sum().item()
+        val_correct = (torch.argmax(pred, dim=1) == torch.argmax(
+            y_test, 1)).type(torch.float).sum().item()
 
+        train_acc_hist.append(train_correct / TRAIN_SIZE)
+        val_acc_hist.append(val_correct / VAL_SIZE)
 
-    train_acc_hist.append(train_correct / TRAIN_SIZE)
-    val_acc_hist.append(val_correct / VAL_SIZE)
+    # Report
 
-
-
-
-    # Report 
-    
     print(f'''
     
     Epoch #{epoch}

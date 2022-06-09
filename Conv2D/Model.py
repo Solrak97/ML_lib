@@ -3,64 +3,57 @@ from torch.nn import Conv2d
 from torch.nn import Linear
 from torch.nn import MaxPool2d
 from torch.nn import Softmax
-from torch import flatten, sigmoid
-from torch.nn.functional import relu
-from utils import plot_tensor
+from torch.nn import LeakyReLU
 
 
 class CnnModel(Module):
     def __init__(self):
         super(CnnModel, self).__init__()
         # Primer capa convolucional:
-        self.conv1 = Conv2d(in_channels=3, out_channels=40, kernel_size=(3,3))
-        self.maxpool1 = MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+        self.conv1 = Conv2d(in_channels=3, out_channels=6,
+                            kernel_size=(3, 3), padding="same")
+        self.maxpool1 = MaxPool2d(kernel_size=(2, 2))
+        self.lrelu1 = LeakyReLU(0.01)
 
         # Segunda capa convolucional
-        self.conv2 = Conv2d(in_channels=40, out_channels=80, kernel_size=(3,3))
-        self.maxpool2 = MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+        self.conv2 = Conv2d(in_channels=6, out_channels=12,
+                            kernel_size=(3, 3), padding="same")
+        self.maxpool2 = MaxPool2d(kernel_size=(2, 2))
+        self.lrelu2 = LeakyReLU(0.01)
 
-        
         # Tercera capa convolucional
-        self.conv3 = Conv2d(in_channels=80, out_channels=160, kernel_size=(3,3))
-        self.maxpool3 = MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+        self.conv3 = Conv2d(in_channels=12, out_channels=24,
+                            kernel_size=(3, 3), padding="same")
+        self.maxpool3 = MaxPool2d(kernel_size=(2, 2))
+        self.lrelu3 = LeakyReLU(0.01)
 
-
-        # Corregir el tamaño de las dimensiones en el futuro
         # Capa de aprendizaje
-        self.fc1 = Linear(in_features=40, out_features=80)
-        self.fc2 = Linear(in_features=60, out_features=30)
+        self.fc1 = Linear(in_features=384, out_features=192)
+        self.lrelu4 = LeakyReLU(0.01)
 
         # Capa de clasificación
-        self.fc3 = Linear(in_features=80, out_features=120)
+        self.fc2 = Linear(in_features=192, out_features=10)
         self.softmax = Softmax(dim=0)
-        
-    
-    
+
     def forward(self, x):
         # Capa 1
-        x = relu(self.conv1(x))
+        x = self.lrelu1(self.conv1(x))
         x = self.maxpool1(x)
-        
+
         # Capa 2
-        x = relu(self.conv2(x))
+        x = self.lrelu2(self.conv2(x))
         x = self.maxpool2(x)
 
         # Capa 3
-        x = relu(self.conv3(x))
+        x = self.lrelu3(self.conv3(x))
         x = self.maxpool3(x)
 
-        print(x.shape)
-        
         # Flattening
-        x = x.view(-1, 120)
-        
+        x = x.view(-1, 24 * 4 * 4)
+
         # FC1
-        x = relu(self.fc1(x))
-        x = relu(self.fc2(x))
-        
-        # Clasificación
-        x = self.fc3(x)
-        output = self.softmax(x)
+        x = self.lrelu4(self.fc1(x))
+
+        output = self.softmax(self.fc2(x))
 
         return output
-        
